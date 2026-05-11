@@ -10,6 +10,6 @@ class TeamResponse(BaseModel):
     losses: int
     win_percentage: float
     analysis_goals: StatisticsByMarketResponse
-    #analysis_cards: StatisticsByMarketResponse
-    #analysis_fouls: StatisticsByMarketResponse
-    #analysis_corners: StatisticsByMarketResponse
+    analysis_cards: StatisticsByMarketResponse
+    analysis_fouls: StatisticsByMarketResponse
+    analysis_corners: StatisticsByMarketResponse

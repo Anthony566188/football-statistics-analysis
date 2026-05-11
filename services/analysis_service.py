@@ -1,6 +1,7 @@
 from statistics import mean
 from typing import List
 
+from numpy.ma.core import minimum
 from numpy.ma.extras import median
 
 from dtos.analysis_by_team_response import AnalysisByTeamResponse
@@ -81,6 +82,9 @@ class AnalysisService:
             draws = 0
             losses = 0
             goals_by_match_team = []
+            cards_by_match_team = []
+            fouls_by_match_team = []
+            corners_by_match_team = []
 
 
 
@@ -104,16 +108,26 @@ class AnalysisService:
                 else:
                     losses += 1
 
-                # Separa os gols do time na lista para calcular a média posteriormente
-                if home_team == team:
-                    goals_by_match_team.append(game.home_goals)
-                if away_team == team:
-                    goals_by_match_team.append(game.away_goals)
+                # Separa os gols do time na lista
+                if home_team == team: goals_by_match_team.append(game.home_goals)
+                if away_team == team: goals_by_match_team.append(game.away_goals)
+
+                # Separa os cartões do time na lista
+                if home_team == team: cards_by_match_team.append(game.yellow_cards_home)
+                if away_team == team: cards_by_match_team.append(game.yellow_cards_away)
+
+                # Separa as faltas do time na lista
+                if home_team == team: fouls_by_match_team.append(game.fouls_home)
+                if away_team == team: fouls_by_match_team.append(game.fouls_away)
+
+                # Separa os Escanteios do TIME na lista
+                if home_team == team: corners_by_match_team.append(game.corners_home)
+                if away_team == team: corners_by_match_team.append(game.corners_away)
 
             # Calcula o aproveitamento do time
             win_percentage = self.win_percentage(matchs, wins, draws)
 
-            # Estatísticas de gols do TIME
+            # Estatísticas de Gols do TIME
             average_goals = mean(goals_by_match_team) if goals_by_match_team else 0.0
             median_goals = median(goals_by_match_team) if goals_by_match_team else 0.0
             min_goals = min(goals_by_match_team) if goals_by_match_team else 0.0
@@ -124,9 +138,51 @@ class AnalysisService:
             )
 
 
-            teams_dicionaly[team.upper()] = (
+            # Estatísticas de Cartões do TIME
+            average_cards = mean(cards_by_match_team) if cards_by_match_team else 0.0
+            median_cards = median(cards_by_match_team) if cards_by_match_team else 0.0
+            min_cards = min(cards_by_match_team) if cards_by_match_team else 0.0
+            max_cards = max(cards_by_match_team) if cards_by_match_team else 0.0
+
+            analysis_cards_by_team = StatisticsByMarketResponse(
+                average=average_cards, median=median_cards, minimum=min_cards, maximum=max_cards
+            )
+
+
+            # Estatísticas de Faltas do TIME
+            average_fouls = mean(fouls_by_match_team) if fouls_by_match_team else 0.0
+            median_fouls = median(fouls_by_match_team) if fouls_by_match_team else 0.0
+            min_fouls = min(fouls_by_match_team) if fouls_by_match_team else 0.0
+            max_fouls = max(fouls_by_match_team) if fouls_by_match_team else 0.0
+
+            analysis_fouls_by_team = StatisticsByMarketResponse(
+                average=average_fouls, median=median_fouls, minimum=min_fouls, maximum=max_fouls
+            )
+
+
+            # Estatísticas de Escanteios do TIME
+            average_corners = mean(corners_by_match_team) if corners_by_match_team else 0.0
+            median_corners = median(corners_by_match_team) if corners_by_match_team else 0.0
+            min_corners = min(corners_by_match_team) if corners_by_match_team else 0.0
+            max_corners = max(corners_by_match_team) if corners_by_match_team else 0.0
+
+            analysis_corners_by_team = StatisticsByMarketResponse(
+                average=average_corners, median=median_corners, minimum=min_corners, maximum=max_corners
+            )
+
+
+
+            teams_dicionaly[team] = (
                 TeamResponse(matchs=matchs, wins=wins, draws=draws, losses=losses,
-                             win_percentage=win_percentage, analysis_goals=analysis_goals_by_team))
+                             win_percentage=win_percentage, analysis_goals=analysis_goals_by_team,
+                             analysis_cards=analysis_cards_by_team, analysis_fouls=analysis_fouls_by_team,
+                             analysis_corners=analysis_corners_by_team
+                )
+            )
+
+
+
+
 
         # Estatísticas de gols
         statistics_goals = (
