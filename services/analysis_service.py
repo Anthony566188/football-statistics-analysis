@@ -1,7 +1,6 @@
 from statistics import mean
 from typing import List
 
-from numpy.ma.core import minimum
 from numpy.ma.extras import median
 
 from dtos.analysis_by_team_response import AnalysisByTeamResponse
@@ -78,6 +77,8 @@ class AnalysisService:
 
         for team in teams:
             matchs = 0
+            home_matchs = 0
+            away_matchs = 0
             wins = 0
             draws = 0
             losses = 0
@@ -100,6 +101,8 @@ class AnalysisService:
 
                 matchs += 1
 
+
+
                 # Calcula vitórias, empates e derrotas usando o DTO de resposta
                 if game_response.result == team:
                     wins += 1
@@ -109,8 +112,12 @@ class AnalysisService:
                     losses += 1
 
                 # Separa os gols do time na lista
-                if home_team == team: goals_by_match_team.append(game.home_goals)
-                if away_team == team: goals_by_match_team.append(game.away_goals)
+                if home_team == team:
+                    goals_by_match_team.append(game.home_goals)
+                    home_matchs += 1
+                if away_team == team:
+                    goals_by_match_team.append(game.away_goals)
+                    away_matchs += 1
 
                 # Separa os cartões do time na lista
                 if home_team == team: cards_by_match_team.append(game.yellow_cards_home)
@@ -124,8 +131,10 @@ class AnalysisService:
                 if home_team == team: corners_by_match_team.append(game.corners_home)
                 if away_team == team: corners_by_match_team.append(game.corners_away)
 
-            # Calcula o aproveitamento do time
-            win_percentage = self.win_percentage(matchs, wins, draws)
+            # Calcula o aproveitamento do time no GERAL
+            win_percentage_general = self.win_percentage(matchs, wins, draws)
+
+            #win_percentage_home = self.win_percentage(home_matchs, )
 
             # Estatísticas de Gols do TIME
             average_goals = mean(goals_by_match_team) if goals_by_match_team else 0.0
@@ -173,8 +182,10 @@ class AnalysisService:
 
 
             teams_dicionaly[team] = (
-                TeamResponse(matchs=matchs, wins=wins, draws=draws, losses=losses,
-                             win_percentage=win_percentage, analysis_goals=analysis_goals_by_team,
+                TeamResponse(matchs=matchs, wins=wins, draws=draws, losses=losses, home_wins=, home_draws=,
+                             home_losses=, away_wins=, away_draws=, away_losses=,
+                             win_percentage_general=win_percentage_general, win_percentage_home=,
+                             win_percentage_away=, analysis_goals=analysis_goals_by_team,
                              analysis_cards=analysis_cards_by_team, analysis_fouls=analysis_fouls_by_team,
                              analysis_corners=analysis_corners_by_team
                 )
