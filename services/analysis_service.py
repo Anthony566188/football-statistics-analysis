@@ -83,33 +83,45 @@ class AnalysisService:
             goals_by_match_team = []
 
 
-            for game in game_responses:
 
-                if team != game.game.home_team and team != game.away_team:
+
+            for game, game_response in zip(games, game_responses):
+
+                home_team = game.home_team.upper()
+                away_team = game.away_team.upper()
+
+                # Pula para a próxima iteração se o time não estiver presente na partida
+                if team != home_team and team != away_team:
                     continue
 
                 matchs += 1
 
-                if game.result == team:
+                # Calcula vitórias, empates e derrotas usando o DTO de resposta
+                if game_response.result == team:
                     wins += 1
-                elif game.result == "DRAW":
+                elif game_response.result == "DRAW":
                     draws += 1
                 else:
                     losses += 1
 
-            for game in games:
-                if game.home_team == team:
+                # Separa os gols do time na lista para calcular a média posteriormente
+                if home_team == team:
                     goals_by_match_team.append(game.home_goals)
-                if game.away_team == team:
+                if away_team == team:
                     goals_by_match_team.append(game.away_goals)
 
-
-
+            # Calcula o aproveitamento do time
             win_percentage = self.win_percentage(matchs, wins, draws)
-            average_goals = mean(goals_by_match_team)
 
+            # Estatísticas de gols do TIME
+            average_goals = mean(goals_by_match_team) if goals_by_match_team else 0.0
+            median_goals = median(goals_by_match_team) if goals_by_match_team else 0.0
+            min_goals = min(goals_by_match_team) if goals_by_match_team else 0.0
+            max_goals = max(goals_by_match_team) if goals_by_match_team else 0.0
 
-            analysis_goals_by_team = StatisticsByMarketResponse(average=average_goals, median=0, minimum=0, maximum=0)
+            analysis_goals_by_team = StatisticsByMarketResponse(
+                average=average_goals, median=median_goals, minimum=min_goals, maximum=max_goals
+            )
 
 
             teams_dicionaly[team.upper()] = (
