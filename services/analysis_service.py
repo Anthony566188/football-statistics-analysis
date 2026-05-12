@@ -77,11 +77,17 @@ class AnalysisService:
 
         for team in teams:
             matchs = 0
-            home_matchs = 0
-            away_matchs = 0
+            home_matches = 0
+            away_matches = 0
             wins = 0
+            home_wins = 0
+            away_wins = 0
             draws = 0
+            home_draws = 0
+            away_draws = 0
             losses = 0
+            home_losses = 0
+            away_losses = 0
             goals_by_match_team = []
             cards_by_match_team = []
             fouls_by_match_team = []
@@ -111,13 +117,43 @@ class AnalysisService:
                 else:
                     losses += 1
 
-                # Separa os gols do time na lista
-                if home_team == team:
-                    goals_by_match_team.append(game.home_goals)
-                    home_matchs += 1
+                # Separa os gols do time Fora na lista
                 if away_team == team:
                     goals_by_match_team.append(game.away_goals)
-                    away_matchs += 1
+                    away_matches += 1
+
+                    # Verifica se o time venceu
+                    if away_team == game_response.result:
+                        away_wins += 1
+
+                    # Verifica se o time EMPATOU
+                    if game_response.result == "DRAW":
+                        away_draws += 1
+
+                    # Verifica se time PERDEU
+                    if game_response.result != away_team and game_response.result != "DRAW":
+                        away_losses += 1
+
+                # Verfica se o time jogou em CASA
+                if home_team == team:
+                    # Separa os gols do time na lista
+                    goals_by_match_team.append(game.home_goals)
+                    home_matches += 1
+
+                    # Verifica se o time venceu
+                    if home_team == game_response.result:
+                        home_wins += 1
+
+                    # Verifica se o time EMPATOU
+                    if game_response.result == "DRAW":
+                        home_draws += 1
+
+                    # Verifica se time PERDEU
+                    if game_response.result != home_team and game_response.result != "DRAW":
+                        home_losses += 1
+
+
+
 
                 # Separa os cartões do time na lista
                 if home_team == team: cards_by_match_team.append(game.yellow_cards_home)
@@ -134,7 +170,11 @@ class AnalysisService:
             # Calcula o aproveitamento do time no GERAL
             win_percentage_general = self.win_percentage(matchs, wins, draws)
 
-            #win_percentage_home = self.win_percentage(home_matchs, )
+            # Calcula o aproveitamento do time em CASA
+            win_percentage_home = self.win_percentage(home_matches, home_wins, home_draws)
+
+            # Calcula o aproveitamento do time jogando FORA
+            win_percentage_away = self.win_percentage(away_matches, away_wins, away_draws)
 
             # Estatísticas de Gols do TIME
             average_goals = mean(goals_by_match_team) if goals_by_match_team else 0.0
@@ -182,10 +222,10 @@ class AnalysisService:
 
 
             teams_dicionaly[team] = (
-                TeamResponse(matchs=matchs, wins=wins, draws=draws, losses=losses, home_wins=, home_draws=,
-                             home_losses=, away_wins=, away_draws=, away_losses=,
-                             win_percentage_general=win_percentage_general, win_percentage_home=,
-                             win_percentage_away=, analysis_goals=analysis_goals_by_team,
+                TeamResponse(total_matches=matchs, wins=wins, draws=draws, losses=losses, home_matches=home_matches, home_wins=home_wins, home_draws=home_draws,
+                             home_losses=home_losses, away_matches=away_matches, away_wins=away_wins, away_draws=away_draws, away_losses=away_losses,
+                             win_percentage_general=win_percentage_general, win_percentage_home=win_percentage_home,
+                             win_percentage_away=win_percentage_away, analysis_goals=analysis_goals_by_team,
                              analysis_cards=analysis_cards_by_team, analysis_fouls=analysis_fouls_by_team,
                              analysis_corners=analysis_corners_by_team
                 )

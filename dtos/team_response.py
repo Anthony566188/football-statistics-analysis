@@ -4,13 +4,15 @@ from dtos.statistics_by_market_response import StatisticsByMarketResponse
 
 
 class TeamResponse(BaseModel):
-    matchs: int
+    total_matches: int
     wins: int
     draws: int
     losses: int
+    home_matches: int
     home_wins: int
     home_draws: int
     home_losses: int
+    away_matches: int
     away_wins: int
     away_draws: int
     away_losses: int
