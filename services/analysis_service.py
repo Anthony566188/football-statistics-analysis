@@ -7,6 +7,7 @@ from dtos.analysis_by_team_response import AnalysisByTeamResponse
 from dtos.analysis_response import AnalysisResponse
 from dtos.game_response import GameResponse
 from dtos.general_analysis_response import GeneralAnalysisResponse
+from dtos.outcome_statistics_response import OutcomeStatisticsResponse
 from dtos.statistics_by_market_response import StatisticsByMarketResponse
 from dtos.team_response import TeamResponse
 from models.game import Game
@@ -76,7 +77,7 @@ class AnalysisService:
         ))
 
         for team in teams:
-            matchs = 0
+            matches = 0
             home_matches = 0
             away_matches = 0
             wins = 0
@@ -105,7 +106,7 @@ class AnalysisService:
                 if team != home_team and team != away_team:
                     continue
 
-                matchs += 1
+                matches += 1
 
 
 
@@ -168,13 +169,23 @@ class AnalysisService:
                 if away_team == team: corners_by_match_team.append(game.corners_away)
 
             # Calcula o aproveitamento do time no GERAL
-            win_percentage_general = self.win_percentage(matchs, wins, draws)
+            win_percentage_general = self.win_percentage(matches, wins, draws)
+
+            analysis_results_general = OutcomeStatisticsResponse(matches=matches, wins=wins, draws=draws, losses=losses, win_percentage=win_percentage_general)
+
+
 
             # Calcula o aproveitamento do time em CASA
             win_percentage_home = self.win_percentage(home_matches, home_wins, home_draws)
 
+            home_analysis = OutcomeStatisticsResponse(matches=home_matches, wins=home_wins, draws=home_draws, losses=home_losses, win_percentage=win_percentage_home)
+
+
             # Calcula o aproveitamento do time jogando FORA
             win_percentage_away = self.win_percentage(away_matches, away_wins, away_draws)
+
+            away_analysis = OutcomeStatisticsResponse(matches=away_matches, wins=away_wins, draws=away_draws, losses=away_losses, win_percentage=win_percentage_away)
+
 
             # Estatísticas de Gols do TIME
             average_goals = mean(goals_by_match_team) if goals_by_match_team else 0.0
@@ -222,13 +233,10 @@ class AnalysisService:
 
 
             teams_dicionaly[team] = (
-                TeamResponse(total_matches=matchs, wins=wins, draws=draws, losses=losses, home_matches=home_matches, home_wins=home_wins, home_draws=home_draws,
-                             home_losses=home_losses, away_matches=away_matches, away_wins=away_wins, away_draws=away_draws, away_losses=away_losses,
-                             win_percentage_general=win_percentage_general, win_percentage_home=win_percentage_home,
-                             win_percentage_away=win_percentage_away, analysis_goals=analysis_goals_by_team,
+                TeamResponse(analysis_results_general=analysis_results_general, home_analysis=home_analysis, away_analysis=away_analysis, analysis_goals=analysis_goals_by_team,
                              analysis_cards=analysis_cards_by_team, analysis_fouls=analysis_fouls_by_team,
                              analysis_corners=analysis_corners_by_team
-                )
+                             )
             )
 
 
@@ -276,7 +284,7 @@ class AnalysisService:
 
 
         # Análise GERAL com todos os mercados
-        general_analysis = (
+        general_results_general = (
             GeneralAnalysisResponse(
                 goals=statistics_goals, cards=statistics_cards, fouls=statistics_fouls,
                 corners=statistics_corners
@@ -288,7 +296,7 @@ class AnalysisService:
         return AnalysisResponse(
             games=game_responses,
             analysis_by_team=AnalysisByTeamResponse(teams=teams_dicionaly),
-            general_analysis=general_analysis
+            general_analysis=general_results_general
 
         )
 
