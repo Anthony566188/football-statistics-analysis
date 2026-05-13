@@ -19,8 +19,8 @@ class GameService:
                 result=result.upper(),
                 total_goals=g.home_goals + g.away_goals,
                 total_cards=g.yellow_cards_home + g.yellow_cards_away,
-                total_fouls=g.fouls_home + g.fouls_away,
-                total_corners=g.corners_home + g.corners_away
+                total_fouls=g.home_fouls + g.away_fouls,
+                total_corners=g.home_corners + g.away_corners
             )
             data_games.append(calculated_data)
         return data_games

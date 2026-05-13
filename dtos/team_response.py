@@ -1,18 +1,16 @@
 from pydantic import BaseModel
 
-from dtos.outcome_statistics_response import OutcomeStatisticsResponse
-from dtos.statistics_by_market_response import StatisticsByMarketResponse
-
+from dtos.analysis_by_market_response import AnalysisByMarketResponse
 
 class TeamResponse(BaseModel):
     # general
-    analysis_results_general: OutcomeStatisticsResponse
+    general_analysis: AnalysisByMarketResponse
     # home
-    home_analysis: OutcomeStatisticsResponse
+    home_analysis: AnalysisByMarketResponse
     # away
-    away_analysis: OutcomeStatisticsResponse
+    away_analysis: AnalysisByMarketResponse
 
-    analysis_goals: StatisticsByMarketResponse
-    analysis_cards: StatisticsByMarketResponse
-    analysis_fouls: StatisticsByMarketResponse
-    analysis_corners: StatisticsByMarketResponse
+'''    analysis_goals: StatisticalMeasuresResponse
+    analysis_cards: StatisticalMeasuresResponse
+    analysis_fouls: StatisticalMeasuresResponse
+    analysis_corners: StatisticalMeasuresResponse'''

@@ -9,8 +9,8 @@ class Game(BaseModel):
     away_goals: int
     yellow_cards_home: int
     yellow_cards_away: int
-    fouls_home: int
-    fouls_away: int
-    corners_home: int
-    corners_away: int
+    home_fouls: int
+    away_fouls: int
+    home_corners: int
+    away_corners: int
 

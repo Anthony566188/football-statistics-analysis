@@ -3,12 +3,14 @@ from typing import List
 
 from numpy.ma.extras import median
 
+from dtos.analysis_by_market_response import AnalysisByMarketResponse
 from dtos.analysis_by_team_response import AnalysisByTeamResponse
 from dtos.analysis_response import AnalysisResponse
+from dtos.analysis_results_response import AnalysisResultsResponse
 from dtos.game_response import GameResponse
 from dtos.general_analysis_response import GeneralAnalysisResponse
-from dtos.outcome_statistics_response import OutcomeStatisticsResponse
-from dtos.statistics_by_market_response import StatisticsByMarketResponse
+from dtos.statistical_measure_response import StatisticalMeasuresResponse
+
 from dtos.team_response import TeamResponse
 from models.game import Game
 
@@ -46,28 +48,28 @@ class AnalysisService:
 
 
         # Estatísticas de gols GERAL
-        average_goals = total_goals_games / len(game_responses)
-        median_goals = median(goals_by_match)
-        min_goals = min(goals_by_match)
-        max_goals = max(goals_by_match)
+        average_goals_all_matches = total_goals_games / len(game_responses)
+        median_goals_all_matches = median(goals_by_match)
+        min_goals_all_matches = min(goals_by_match)
+        max_goals_all_matches = max(goals_by_match)
 
         # Estatísticas de cartões GERAL
-        average_cards = mean(cards_by_match)
-        median_cards = median(cards_by_match)
-        min_cards = min(cards_by_match)
-        max_cards = max(cards_by_match)
+        average_cards_all_matches = mean(cards_by_match)
+        median_cards_all_matches = median(cards_by_match)
+        min_cards_all_matches = min(cards_by_match)
+        max_cards_all_matches = max(cards_by_match)
 
         # Estatísticas de faltas GERAL
-        average_fouls = mean(fouls_by_match)
-        median_fouls = median(fouls_by_match)
-        min_fouls = min(fouls_by_match)
-        max_fouls = max(fouls_by_match)
+        average_fouls_all_matches = mean(fouls_by_match)
+        median_fouls_all_matches = median(fouls_by_match)
+        min_fouls_all_matches = min(fouls_by_match)
+        max_fouls_all_matches = max(fouls_by_match)
 
         # Estatísticas de escanteios GERAL
-        average_corners = mean(corners_by_match)
-        median_corners = median(corners_by_match)
-        min_corners = min(corners_by_match)
-        max_corners = max(corners_by_match)
+        average_corners_all_matches = mean(corners_by_match)
+        median_corners_all_matches = median(corners_by_match)
+        min_corners_all_matches = min(corners_by_match)
+        max_corners_all_matches = max(corners_by_match)
 
         # Loop para pegar os times presentes nos jogos
         teams = list(set(
@@ -90,9 +92,17 @@ class AnalysisService:
             home_losses = 0
             away_losses = 0
             goals_by_match_team = []
+            home_goals = []
+            away_goals = []
             cards_by_match_team = []
+            home_cards = []
+            away_cards = []
             fouls_by_match_team = []
+            home_fouls = []
+            away_fouls = []
             corners_by_match_team = []
+            home_corners = []
+            away_corners = []
 
 
 
@@ -118,9 +128,18 @@ class AnalysisService:
                 else:
                     losses += 1
 
-                # Separa os gols do time Fora na lista
+                # Separa os gols do time de Fora na lista
                 if away_team == team:
                     goals_by_match_team.append(game.away_goals)
+                    away_goals.append(game.away_goals)
+                    away_cards.append(game.yellow_cards_away)
+                    away_fouls.append(game.away_fouls)
+                    away_corners.append(game.away_corners)
+
+                    cards_by_match_team.append(game.yellow_cards_away)
+                    fouls_by_match_team.append(game.away_fouls)
+                    corners_by_match_team.append(game.away_corners)
+
                     away_matches += 1
 
                     # Verifica se o time venceu
@@ -139,6 +158,18 @@ class AnalysisService:
                 if home_team == team:
                     # Separa os gols do time na lista
                     goals_by_match_team.append(game.home_goals)
+                    # Adiciona na lista de gols em CASA
+                    home_goals.append(game.home_goals)
+                    # Adiciona na lista de cartões em CASA
+                    home_cards.append(game.yellow_cards_home)
+                    # Adiciona na lista de faltas em CASA
+                    home_fouls.append(game.home_fouls)
+                    # Adiciona na lista de escanteios em CASA
+                    home_corners.append(game.home_corners)
+
+                    cards_by_match_team.append(game.yellow_cards_home)
+                    fouls_by_match_team.append(game.home_fouls)
+                    corners_by_match_team.append(game.home_corners)
                     home_matches += 1
 
                     # Verifica se o time venceu
@@ -157,106 +188,167 @@ class AnalysisService:
 
 
                 # Separa os cartões do time na lista
-                if home_team == team: cards_by_match_team.append(game.yellow_cards_home)
-                if away_team == team: cards_by_match_team.append(game.yellow_cards_away)
+#                if home_team == team: cards_by_match_team.append(game.yellow_cards_home)
+ #               if away_team == team: cards_by_match_team.append(game.yellow_cards_away)
+#
+ #               # Separa as faltas do time na lista
+  #              if home_team == team: fouls_by_match_team.append(game.home_fouls)
+   #             if away_team == team: fouls_by_match_team.append(game.away_fouls)
+#
+ #               # Separa os Escanteios do TIME na lista
+  #              if home_team == team: corners_by_match_team.append(game.home_corners)
+   #             if away_team == team: corners_by_match_team.append(game.away_corners)
 
-                # Separa as faltas do time na lista
-                if home_team == team: fouls_by_match_team.append(game.fouls_home)
-                if away_team == team: fouls_by_match_team.append(game.fouls_away)
-
-                # Separa os Escanteios do TIME na lista
-                if home_team == team: corners_by_match_team.append(game.corners_home)
-                if away_team == team: corners_by_match_team.append(game.corners_away)
 
             # Calcula o aproveitamento do time no GERAL
             win_percentage_general = self.win_percentage(matches, wins, draws)
 
-            analysis_results_general = OutcomeStatisticsResponse(matches=matches, wins=wins, draws=draws, losses=losses, win_percentage=win_percentage_general)
-
-
-
             # Calcula o aproveitamento do time em CASA
             win_percentage_home = self.win_percentage(home_matches, home_wins, home_draws)
-
-            home_analysis = OutcomeStatisticsResponse(matches=home_matches, wins=home_wins, draws=home_draws, losses=home_losses, win_percentage=win_percentage_home)
-
 
             # Calcula o aproveitamento do time jogando FORA
             win_percentage_away = self.win_percentage(away_matches, away_wins, away_draws)
 
-            away_analysis = OutcomeStatisticsResponse(matches=away_matches, wins=away_wins, draws=away_draws, losses=away_losses, win_percentage=win_percentage_away)
 
-
-            # Estatísticas de Gols do TIME
+            # Estatísticas de Gols do TIME GERAL
             average_goals = mean(goals_by_match_team) if goals_by_match_team else 0.0
             median_goals = median(goals_by_match_team) if goals_by_match_team else 0.0
             min_goals = min(goals_by_match_team) if goals_by_match_team else 0.0
             max_goals = max(goals_by_match_team) if goals_by_match_team else 0.0
 
-            analysis_goals_by_team = StatisticsByMarketResponse(
-                average=average_goals, median=median_goals, minimum=min_goals, maximum=max_goals
-            )
+            # Estatísticas de Gols do time em CASA
+            home_goals_average = mean(home_goals) if home_goals else 0.0
+            home_goals_median = median(home_goals) if home_goals else 0.0
+            home_goals_min = min(home_goals) if home_goals else 0.0
+            home_goals_max = max(home_goals) if home_goals else 0.0
+
+            # Estatísticas de Gols do time FORA
+            away_goals_average = mean(away_goals) if away_goals else 0.0
+            away_goals_median = median(away_goals) if away_goals else 0.0
+            away_goals_min = min(away_goals) if away_goals else 0.0
+            away_goals_max = max(away_goals) if away_goals else 0.0
 
 
-            # Estatísticas de Cartões do TIME
+            # Estatísticas de Cartões do TIME GERAL
             average_cards = mean(cards_by_match_team) if cards_by_match_team else 0.0
             median_cards = median(cards_by_match_team) if cards_by_match_team else 0.0
             min_cards = min(cards_by_match_team) if cards_by_match_team else 0.0
             max_cards = max(cards_by_match_team) if cards_by_match_team else 0.0
 
-            analysis_cards_by_team = StatisticsByMarketResponse(
-                average=average_cards, median=median_cards, minimum=min_cards, maximum=max_cards
-            )
+            # Estatísticas de Cartões do time em CASA
+            home_cards_average = mean(home_cards) if home_cards else 0.0
+            home_cards_median = median(home_cards) if home_cards else 0.0
+            home_cards_min = min(home_cards) if home_cards else 0.0
+            home_cards_max = max(home_cards) if home_cards else 0.0
 
+            # Estatísticas de Cartões do time FORA
+            away_cards_average = mean(away_cards) if away_cards else 0.0
+            away_cards_median = median(away_cards) if away_cards else 0.0
+            away_cards_min = min(away_cards) if away_cards else 0.0
+            away_cards_max = max(away_cards) if away_cards else 0.0
 
-            # Estatísticas de Faltas do TIME
+            # Estatísticas de Faltas do TIME GERAL
             average_fouls = mean(fouls_by_match_team) if fouls_by_match_team else 0.0
             median_fouls = median(fouls_by_match_team) if fouls_by_match_team else 0.0
             min_fouls = min(fouls_by_match_team) if fouls_by_match_team else 0.0
             max_fouls = max(fouls_by_match_team) if fouls_by_match_team else 0.0
 
-            analysis_fouls_by_team = StatisticsByMarketResponse(
-                average=average_fouls, median=median_fouls, minimum=min_fouls, maximum=max_fouls
-            )
+            # Estatísticas de Faltas do time em CASA
+            home_fouls_average = mean(home_fouls) if home_fouls else 0.0
+            home_fouls_median = median(home_fouls) if home_fouls else 0.0
+            home_fouls_min = min(home_fouls) if home_fouls else 0.0
+            home_fouls_max = max(home_fouls) if home_fouls else 0.0
+
+            # Estatísticas de Faltas do time FORA
+            away_fouls_average = mean(away_fouls) if away_fouls else 0.0
+            away_fouls_median = median(away_fouls) if away_fouls else 0.0
+            away_fouls_min = min(away_fouls) if away_fouls else 0.0
+            away_fouls_max = max(away_fouls) if away_fouls else 0.0
 
 
-            # Estatísticas de Escanteios do TIME
+
+            # Estatísticas de Escanteios do TIME GERAL
             average_corners = mean(corners_by_match_team) if corners_by_match_team else 0.0
             median_corners = median(corners_by_match_team) if corners_by_match_team else 0.0
             min_corners = min(corners_by_match_team) if corners_by_match_team else 0.0
             max_corners = max(corners_by_match_team) if corners_by_match_team else 0.0
 
-            analysis_corners_by_team = StatisticsByMarketResponse(
-                average=average_corners, median=median_corners, minimum=min_corners, maximum=max_corners
-            )
+            # Estatísticas de Escanteios do time em CASA
+            home_corners_average = mean(home_corners) if home_corners else 0.0
+            home_corners_median = median(home_corners) if home_corners else 0.0
+            home_corners_min = min(home_corners) if home_corners else 0.0
+            home_corners_max = max(home_corners) if home_corners else 0.0
+
+            # Estatísticas de Escanteios do time FORA
+            away_corners_average = mean(away_corners) if away_corners else 0.0
+            away_corners_median = median(away_corners) if away_corners else 0.0
+            away_corners_min = min(away_corners) if away_corners else 0.0
+            away_corners_max = max(away_corners) if away_corners else 0.0
 
 
 
+
+
+            general_results_analysis_team = AnalysisResultsResponse(matches=matches, wins=wins, draws=draws, losses=losses,
+                                                       win_percentage=win_percentage_general)
+
+            general_goals_analysis_team = StatisticalMeasuresResponse(average=average_goals, median=median_goals, minimum=min_goals, maximum=max_goals)
+
+            general_cards_analysis_team = StatisticalMeasuresResponse(average=average_cards, median=median_cards, minimum=min_cards, maximum=max_cards)
+
+            general_fouls_analysis_team = StatisticalMeasuresResponse(average=average_fouls, median=median_fouls, minimum=min_fouls, maximum=max_fouls)
+
+            general_corners_analysis_team = StatisticalMeasuresResponse(average=average_corners, median=median_corners, minimum=min_corners, maximum=max_corners)
+
+            general_analysis = AnalysisByMarketResponse(results=general_results_analysis_team, goals=general_goals_analysis_team, cards=general_cards_analysis_team, fouls=general_fouls_analysis_team, corners=general_corners_analysis_team)
+
+            # Análise em CASA
+            home_results_analysis = AnalysisResultsResponse(matches=home_matches, wins=home_wins, draws=home_draws, losses=home_losses, win_percentage=win_percentage_home)
+
+            home_goals_analysis = StatisticalMeasuresResponse(average=home_goals_average, median=home_goals_median, minimum=home_goals_min, maximum=home_goals_max)
+
+            home_cards_analysis = StatisticalMeasuresResponse(average=home_cards_average, median=home_cards_median, minimum=home_cards_min, maximum=home_cards_max)
+
+            home_fouls_analysis = StatisticalMeasuresResponse(average=home_fouls_average, median=home_fouls_median, minimum=home_fouls_min, maximum=home_fouls_max)
+
+            home_corners_analysis = StatisticalMeasuresResponse(average=home_corners_average, median=home_corners_median, minimum=home_corners_min, maximum=home_corners_max)
+
+            home_analysis = AnalysisByMarketResponse(results=home_results_analysis, goals=home_goals_analysis, cards=home_cards_analysis, fouls=home_fouls_analysis, corners=home_corners_analysis)
+
+            # Análise FORA
+            away_results_analysis = AnalysisResultsResponse(matches=away_matches, wins=away_wins, draws=away_draws, losses=away_losses, win_percentage=win_percentage_away)
+
+            away_goals_analysis = StatisticalMeasuresResponse(average=away_goals_average, median=away_goals_median, minimum=away_goals_min, maximum=away_goals_max)
+
+            away_cards_analysis = StatisticalMeasuresResponse(average=away_cards_average, median=away_cards_median, minimum=away_cards_min, maximum=away_cards_max)
+
+            away_fouls_analysis = StatisticalMeasuresResponse(average=away_fouls_average, median=away_fouls_median, minimum=away_fouls_min, maximum=away_fouls_max)
+
+            away_corners_analysis = StatisticalMeasuresResponse(average=away_corners_average, median=away_corners_median, minimum=away_corners_min, maximum=away_corners_max)
+
+            away_analysis = AnalysisByMarketResponse(results=away_results_analysis, goals=away_goals_analysis, cards=away_cards_analysis, fouls=away_fouls_analysis, corners=away_corners_analysis)
+
+            # Passa as análises para o dicionário
             teams_dicionaly[team] = (
-                TeamResponse(analysis_results_general=analysis_results_general, home_analysis=home_analysis, away_analysis=away_analysis, analysis_goals=analysis_goals_by_team,
-                             analysis_cards=analysis_cards_by_team, analysis_fouls=analysis_fouls_by_team,
-                             analysis_corners=analysis_corners_by_team
-                             )
-            )
-
-
+                TeamResponse(general_analysis=general_analysis, home_analysis=home_analysis,
+                             away_analysis=away_analysis))
 
 
 
         # Estatísticas de gols
         statistics_goals = (
-            StatisticsByMarketResponse(
-                average=average_goals, median=median_goals, minimum=min_goals,
-                maximum=max_goals
+            StatisticalMeasuresResponse(
+                average=average_goals_all_matches, median=median_goals_all_matches, minimum=min_goals_all_matches,
+                maximum=max_goals_all_matches
             )
         )
 
 
         # Estatísticas de cartões
         statistics_cards = (
-            StatisticsByMarketResponse(
-                average=average_cards, median=median_cards, minimum=min_cards,
-                maximum=max_cards
+            StatisticalMeasuresResponse(
+                average=average_cards_all_matches, median=median_cards_all_matches, minimum=min_cards_all_matches,
+                maximum=max_cards_all_matches
 
             )
         )
@@ -264,9 +356,9 @@ class AnalysisService:
 
         # Estatísticas de faltas
         statistics_fouls = (
-           StatisticsByMarketResponse(
-               average=average_fouls, median=median_fouls, minimum=min_fouls,
-               maximum=max_fouls
+           StatisticalMeasuresResponse(
+               average=average_fouls_all_matches, median=median_fouls_all_matches, minimum=min_fouls_all_matches,
+               maximum=max_fouls_all_matches
 
            )
         )
@@ -274,9 +366,9 @@ class AnalysisService:
 
        # Estatísticas de escanteios
         statistics_corners = (
-            StatisticsByMarketResponse(
-                average=average_corners, median=median_corners, minimum=min_corners,
-                maximum=max_corners
+            StatisticalMeasuresResponse(
+                average=average_corners_all_matches, median=median_corners_all_matches, minimum=min_corners_all_matches,
+                maximum=max_corners_all_matches
 
             )
         )

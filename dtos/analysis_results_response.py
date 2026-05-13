@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class OutcomeStatisticsResponse(BaseModel):
+class AnalysisResultsResponse(BaseModel):
     matches: int
     wins: int
     draws: int

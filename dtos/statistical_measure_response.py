@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class StatisticsByMarketResponse(BaseModel):
+class StatisticalMeasuresResponse(BaseModel):
     average: float
     median: float
     minimum: int
