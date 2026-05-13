@@ -20,63 +20,17 @@ class AnalysisService:
     def general_analysis(self, game_responses: List[GameResponse], games: List[Game])\
             -> AnalysisResponse:
 
-        total_goals_games = 0
-        teams_dicionaly = {}
-        goals_by_match = []
-        cards_by_match = []
-        fouls_by_match = []
-        corners_by_match = []
+        # 1. Gera as estatísticas gerais de todo os jogos
+        general_match_statistics = self._calculate_general_metrics(game_responses)
 
-
-        for game in game_responses:
-            # Pega o total de gols de todas as partidas
-            total_goals_games += game.total_goals
-
-            # Adiciona na lista o total gols por partida
-            goals_by_match.append(game.total_goals)
-
-            # Adiciona na lista o total de cartões por jogo
-            cards_by_match.append(game.total_cards)
-
-            # Adiciona na lista o total de faltas por jogo
-            fouls_by_match.append(game.total_fouls)
-
-            # Adiciona na lista o total de escanteios por jogo
-            corners_by_match.append(game.total_corners)
-
-
-
-
-        # Estatísticas de gols GERAL
-        average_goals_all_matches = total_goals_games / len(game_responses)
-        median_goals_all_matches = median(goals_by_match)
-        min_goals_all_matches = min(goals_by_match)
-        max_goals_all_matches = max(goals_by_match)
-
-        # Estatísticas de cartões GERAL
-        average_cards_all_matches = mean(cards_by_match)
-        median_cards_all_matches = median(cards_by_match)
-        min_cards_all_matches = min(cards_by_match)
-        max_cards_all_matches = max(cards_by_match)
-
-        # Estatísticas de faltas GERAL
-        average_fouls_all_matches = mean(fouls_by_match)
-        median_fouls_all_matches = median(fouls_by_match)
-        min_fouls_all_matches = min(fouls_by_match)
-        max_fouls_all_matches = max(fouls_by_match)
-
-        # Estatísticas de escanteios GERAL
-        average_corners_all_matches = mean(corners_by_match)
-        median_corners_all_matches = median(corners_by_match)
-        min_corners_all_matches = min(corners_by_match)
-        max_corners_all_matches = max(corners_by_match)
-
-        # Loop para pegar os times presentes nos jogos
+        # 2. Pega os times presentes nos jogos
         teams = list(set(
             team.upper()
             for game in games
             for team in (game.home_team, game.away_team)
         ))
+
+        teams_dicionaly = {}
 
         for team in teams:
             matches = 0
@@ -186,28 +140,14 @@ class AnalysisService:
 
 
 
-
-                # Separa os cartões do time na lista
-#                if home_team == team: cards_by_match_team.append(game.yellow_cards_home)
- #               if away_team == team: cards_by_match_team.append(game.yellow_cards_away)
-#
- #               # Separa as faltas do time na lista
-  #              if home_team == team: fouls_by_match_team.append(game.home_fouls)
-   #             if away_team == team: fouls_by_match_team.append(game.away_fouls)
-#
- #               # Separa os Escanteios do TIME na lista
-  #              if home_team == team: corners_by_match_team.append(game.home_corners)
-   #             if away_team == team: corners_by_match_team.append(game.away_corners)
-
-
             # Calcula o aproveitamento do time no GERAL
-            win_percentage_general = self.win_percentage(matches, wins, draws)
+            win_percentage_general = self._win_percentage(matches, wins, draws)
 
             # Calcula o aproveitamento do time em CASA
-            win_percentage_home = self.win_percentage(home_matches, home_wins, home_draws)
+            win_percentage_home = self._win_percentage(home_matches, home_wins, home_draws)
 
             # Calcula o aproveitamento do time jogando FORA
-            win_percentage_away = self.win_percentage(away_matches, away_wins, away_draws)
+            win_percentage_away = self._win_percentage(away_matches, away_wins, away_draws)
 
 
             # Estatísticas de Gols do TIME GERAL
@@ -335,69 +275,46 @@ class AnalysisService:
 
 
 
-        # Estatísticas de gols
-        statistics_goals = (
-            StatisticalMeasuresResponse(
-                average=average_goals_all_matches, median=median_goals_all_matches, minimum=min_goals_all_matches,
-                maximum=max_goals_all_matches
-            )
-        )
-
-
-        # Estatísticas de cartões
-        statistics_cards = (
-            StatisticalMeasuresResponse(
-                average=average_cards_all_matches, median=median_cards_all_matches, minimum=min_cards_all_matches,
-                maximum=max_cards_all_matches
-
-            )
-        )
-
-
-        # Estatísticas de faltas
-        statistics_fouls = (
-           StatisticalMeasuresResponse(
-               average=average_fouls_all_matches, median=median_fouls_all_matches, minimum=min_fouls_all_matches,
-               maximum=max_fouls_all_matches
-
-           )
-        )
-
-
-       # Estatísticas de escanteios
-        statistics_corners = (
-            StatisticalMeasuresResponse(
-                average=average_corners_all_matches, median=median_corners_all_matches, minimum=min_corners_all_matches,
-                maximum=max_corners_all_matches
-
-            )
-        )
-
-
-
-        # Análise GERAL com todos os mercados
-        general_results_general = (
-            GeneralAnalysisResponse(
-                goals=statistics_goals, cards=statistics_cards, fouls=statistics_fouls,
-                corners=statistics_corners
-
-            )
-        )
-
 
         return AnalysisResponse(
             games=game_responses,
             analysis_by_team=AnalysisByTeamResponse(teams=teams_dicionaly),
-            general_analysis=general_results_general
+            general_analysis=general_match_statistics
 
         )
 
 
 
 
+    def _calculate_statistical_measures(self, values: List[int]) -> StatisticalMeasuresResponse:
+        """Calcula média, mediana, mínimo e máximo para uma lista de valores."""
+        if not values:
+            return StatisticalMeasuresResponse(average=0, median=0, minimum=0, maximum=0)
+
+        return StatisticalMeasuresResponse(
+            average=mean(values),
+            median=median(values),
+            minimum=min(values),
+            maximum=max(values)
+        )
+
+    def _calculate_general_metrics(self, game_respponses: List[GameResponse]) -> GeneralAnalysisResponse:
+        """Gera as estatísticas gerais de todos os jogos."""
+        # Extraindo as listas de valores diretamente via list comprehension
+        goals = [game.total_goals for game in game_respponses]
+        cards = [game.total_cards for game in game_respponses]
+        fouls = [game.total_fouls for game in game_respponses]
+        corners = [game.total_corners for game in game_respponses]
+
+        return GeneralAnalysisResponse(
+            goals=self._calculate_statistical_measures(goals),
+            cards=self._calculate_statistical_measures(cards),
+            fouls=self._calculate_statistical_measures(fouls),
+            corners=self._calculate_statistical_measures(corners)
+        )
 
 
-    def win_percentage(self, matchs: int, wins: int, draws: int) -> float:
+    def _win_percentage(self, matches: int, wins: int, draws: int) -> float:
         points = wins * 3 + draws
-        max_points = matchs * 3
+        max_points = matches * 3
         return points / max_points * 100
