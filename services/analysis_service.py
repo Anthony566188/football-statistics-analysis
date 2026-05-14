@@ -59,10 +59,10 @@ class AnalysisService:
 
     def _calculate_general_metrics(self, game_respponses: List[GameResponse]) -> GeneralAnalysisResponse:
         """Gera as estatísticas gerais de todos os jogos."""
-        goals = [game.total_goals for game in game_respponses]
-        cards = [game.total_cards for game in game_respponses]
-        fouls = [game.total_fouls for game in game_respponses]
-        corners = [game.total_corners for game in game_respponses]
+        goals = [g for g in (game.total_goals for game in game_respponses) if g is not None]
+        cards = [c for c in (game.total_cards for game in game_respponses) if c is not None]
+        fouls = [f for f in (game.total_fouls for game in game_respponses) if f is not None]
+        corners = [c for c in (game.total_corners for game in game_respponses) if c is not None]
 
         return GeneralAnalysisResponse(
             goals=self._calculate_statistical_measures(goals),
@@ -76,7 +76,12 @@ class AnalysisService:
                                 corners: List[int]) -> AnalysisByMarketResponse:
         """Cria o objeto AnalysisByMarketResponse reaproveitando a lógica de estatísticas."""
 
-        win_pct = self._win_percentage(matches, wins, draws) if matches > 0 else 0.0
+        classified_matches = wins + draws + losses
+        win_pct = (
+            self._win_percentage(classified_matches, wins, draws)
+            if classified_matches > 0
+            else 0.0
+        )
 
         results_response = AnalysisResultsResponse(
             matches=matches, wins=wins, draws=draws, losses=losses, win_percentage=win_pct
@@ -107,31 +112,41 @@ class AnalysisService:
 
             if team == home_team:
                 home_matches += 1
-                home_goals.append(game.home_goals)
-                home_cards.append(game.yellow_cards_home)
-                home_fouls.append(game.home_fouls)
-                home_corners.append(game.home_corners)
+                if game.home_goals is not None:
+                    home_goals.append(game.home_goals)
+                if game.yellow_cards_home is not None:
+                    home_cards.append(game.yellow_cards_home)
+                if game.home_fouls is not None:
+                    home_fouls.append(game.home_fouls)
+                if game.home_corners is not None:
+                    home_corners.append(game.home_corners)
 
-                if game_response.result == team:
-                    home_wins += 1
-                elif game_response.result == "DRAW":
-                    home_draws += 1
-                else:
-                    home_losses += 1
+                if game_response.result is not None:
+                    if game_response.result == team:
+                        home_wins += 1
+                    elif game_response.result == "DRAW":
+                        home_draws += 1
+                    else:
+                        home_losses += 1
 
             else:  # team == away_team
                 away_matches += 1
-                away_goals.append(game.away_goals)
-                away_cards.append(game.yellow_cards_away)
-                away_fouls.append(game.away_fouls)
-                away_corners.append(game.away_corners)
+                if game.away_goals is not None:
+                    away_goals.append(game.away_goals)
+                if game.yellow_cards_away is not None:
+                    away_cards.append(game.yellow_cards_away)
+                if game.away_fouls is not None:
+                    away_fouls.append(game.away_fouls)
+                if game.away_corners is not None:
+                    away_corners.append(game.away_corners)
 
-                if game_response.result == team:
-                    away_wins += 1
-                elif game_response.result == "DRAW":
-                    away_draws += 1
-                else:
-                    away_losses += 1
+                if game_response.result is not None:
+                    if game_response.result == team:
+                        away_wins += 1
+                    elif game_response.result == "DRAW":
+                        away_draws += 1
+                    else:
+                        away_losses += 1
 
         # O GERAL é simplesmente a união das listas e soma dos contadores de Casa e Fora
         general_matches = home_matches + away_matches

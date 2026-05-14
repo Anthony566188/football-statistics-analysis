@@ -1,5 +1,4 @@
-from typing import Union, Optional
-
+from typing import Optional
 from pydantic import BaseModel
 from datetime import date
 
@@ -7,10 +6,10 @@ from datetime import date
 class GameResponse(BaseModel):
     id: int
     date: Optional[date]
-    result: str
-    total_goals: int
-    total_cards: int
-    total_fouls: int
-    total_corners: int
+    result: Optional[str]
+    total_goals: Optional[int]
+    total_cards: Optional[int]
+    total_fouls: Optional[int]
+    total_corners: Optional[int]
 
 
