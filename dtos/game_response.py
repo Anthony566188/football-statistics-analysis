@@ -3,6 +3,7 @@ from datetime import date
 
 
 class GameResponse(BaseModel):
+    id: int
     date: date
     result: str
     total_goals: int

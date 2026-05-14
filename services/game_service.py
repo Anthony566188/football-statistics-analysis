@@ -8,13 +8,16 @@ class GameService:
     def calculate(self, games: list[Game]) -> List[GameResponse]:
 
         data_games = []
+        id = 0
 
         for g in games:
+            id += 1
             result = g.home_team if g.home_goals > g.away_goals else g.away_team
             if g.home_goals == g.away_goals:
                 result = "DRAW"
 
             calculated_data = GameResponse(
+                id=id,
                 date=g.date,
                 result=result.upper(),
                 total_goals=g.home_goals + g.away_goals,
