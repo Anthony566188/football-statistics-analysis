@@ -1,8 +1,10 @@
+from typing import Optional
+
 from pydantic import BaseModel
 from datetime import date
 
 class Game(BaseModel):
-    date: date
+    date: Optional[date]
     home_team: str
     away_team: str
     home_goals: int
