@@ -1,18 +1,19 @@
+from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel
-from datetime import date
+from pydantic import BaseModel, Field
+
 
 class Game(BaseModel):
-    date: Optional[date]
-    home_team: str
-    away_team: str
-    home_goals: int
-    away_goals: int
-    yellow_cards_home: int
-    yellow_cards_away: int
-    home_fouls: int
-    away_fouls: int
-    home_corners: int
-    away_corners: int
+    date: Optional[date]# = None
+    home_team: str = Field(..., min_length=1)
+    away_team: str = Field(..., min_length=1)
+    home_goals: Optional[int]# = None
+    away_goals: Optional[int]# = None
+    yellow_cards_home: Optional[int]# = None
+    yellow_cards_away: Optional[int]# = None
+    home_fouls: Optional[int]# = None
+    away_fouls: Optional[int]# = None
+    home_corners: Optional[int]# = None
+    away_corners: Optional[int]# = None
 
